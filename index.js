@@ -26,13 +26,17 @@ client.connect((err) => {
     .db("popularDestination")
     .collection("popularDestinationusers");
 
+  const getintouchCollection = client
+    .db("getintouch")
+    .collection("usergetintouch");
+
   const orderCollection = client.db("order").collection("userorder");
 
   // perform actions on the collection object
   // Event Adding
 
   app.post("/addevents", async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const result = await usersCollection.insertOne(req.body);
     // console.log(result);
     res.send(result.acknowledged);
@@ -41,9 +45,15 @@ client.connect((err) => {
   // Adding Popular Destination
 
   app.post("/adddestination", async (req, res) => {
-    console.log(req.body);
+    // console.log(req.body);
     const populardes = await populardestinationCollection.insertOne(req.body);
     res.send(result.acknowledged);
+  });
+
+  // get in touch data
+  app.post("/usergetintouch", async (req, res) => {
+    const gettuchdata = await getintouchCollection.insertOne(req.body);
+    res.send(gettuchdata.acknowledged);
   });
 
   // Order post api
@@ -63,6 +73,15 @@ client.connect((err) => {
     const order = await cursor.toArray();
     res.send(order);
   });
+
+   // DELETE API
+   app.delete('/order/:id', async (req, res) => {
+    const id = req.params.id;
+    console.log(id);
+    const query = { "_id": ObjectId(id) };
+    const result = await orderCollection.deleteOne(query);
+    res.json(result);
+})
 
   //  get Method
 
