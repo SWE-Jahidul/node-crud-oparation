@@ -21,44 +21,13 @@ app.get("/", (req, res) => {
 });
 
 client.connect((err) => {
-  const usersCollection = client.db("events").collection("eventusers");
-  const populardestinationCollection = client
-    .db("popularDestination")
-    .collection("popularDestinationusers");
+  const usersCollection = client.db("account").collection("accoutuser");
 
-  const getintouchCollection = client
-    .db("getintouch")
-    .collection("usergetintouch");
-
-  const orderCollection = client.db("order").collection("userorder");
-
-  // perform actions on the collection object
-  // Event Adding
-
-  app.post("/addevents", async (req, res) => {
-    // console.log(req.body);
-    const result = await usersCollection.insertOne(req.body);
-    // console.log(result);
-    res.send(result.acknowledged);
-  });
-
-  // Adding Popular Destination
-
-  app.post("/adddestination", async (req, res) => {
-    // console.log(req.body);
-    const populardes = await populardestinationCollection.insertOne(req.body);
-    res.send(result.acknowledged);
-  });
-
-  // get in touch data
-  app.post("/usergetintouch", async (req, res) => {
-    const gettuchdata = await getintouchCollection.insertOne(req.body);
-    res.send(gettuchdata.acknowledged);
-  });
+  const orderCollection = client.db("user").collection("userdetails");
 
   // Order post api
 
-  app.post("/order", async (req, res) => {
+  app.post("/user", async (req, res) => {
     const order = req.body;
     console.log("hit the post api");
     console.log(order);
@@ -68,45 +37,54 @@ client.connect((err) => {
   });
 
   //order get api
-  app.get("/order", async (req, res) => {
+  app.get("/user", async (req, res) => {
     const cursor = orderCollection.find({});
     const order = await cursor.toArray();
     res.send(order);
   });
 
-   // DELETE API
-   app.delete('/order/:id', async (req, res) => {
-    const id = req.params.id;
-    console.log(id);
-    const query = { "_id": ObjectId(id) };
-    const result = await orderCollection.deleteOne(query);
-    res.json(result);
-})
 
-  //  get Method
-
-  app.get("/eventusers", async (req, res) => {
-    const result = await usersCollection.find({}).toArray();
-    // console.log(result);
+  app.get("/user/:id", async (req, res) => {
+   const id = req.params.id;
+   const query = {"_id": ObjectId(id) };
+   const result = await orderCollection.findOne(query);
+ 
     res.send(result);
   });
 
-  app.get("/popularDestinationusers", async (req, res) => {
-    const populardes = await populardestinationCollection.find({}).toArray();
+  app.put("/user/:id", async (req, res) => {
+  const id = req.params.id;
+  const updateuser = req.body;
+  const filter = { _id: ObjectId(id)}
+  const options = { upsert : true};
 
-    res.send(populardes);
-  });
+  const updateDoc = {
+    $set:{
+      firstName : updateuser.firstName,
+    }
+  }
 
-  app.delete("/deleteevents/:id", async (req, res) => {
+  const result = await orderCollection.updateOne(filter,updateDoc,options)
+  console.log(req);
+  res.send(result)
+  
+  })
+
+
+// Delete Api 
+
+  app.delete("/user/:id", async (req, res) => {
     const id = req.params.id;
-
-    const item = {
-      _id: ObjectId(id),
-    };
-    const result = await usersCollection.deleteOne(item);
-    res.send(result.acknowledged);
+    // console.log("id", id);
+    const query = {"_id": ObjectId(id) };
+    const result = await orderCollection.deleteOne(query);
+    res.json(result);
   });
+
+
+
 });
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
